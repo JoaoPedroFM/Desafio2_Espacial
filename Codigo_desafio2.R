@@ -35,8 +35,8 @@ axis(2)
 
 # Histograma do premio
 par(mfrow=c(1,2),mar=c(4,4,0.5,0.5))
-hist(base$premio,main="",xlab="premio")
-hist(log(base$premio),main="",xlab="log(premio)")
+hist(base$premio,main="",xlab="Prêmio",ylab="Frequência")
+hist(log(base$premio),main="",xlab="Log(prêmio)",ylab="Frequência")
 
 base$log_premio <- log(base$premio)
 

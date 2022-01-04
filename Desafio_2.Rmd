@@ -1,0 +1,151 @@
+---
+title: "Desafio II"
+subtitle: "Estatística Espacial I"
+author: "Igor Freitas e João Pedro Fernandes"
+date: "Janeiro/2022"
+output: 
+  rmdformats::readthedown:
+    use_bookdown: true  
+    fig_caption: true
+  html_document: 
+    fig_height: 10
+    fig_width: 12.5
+editor_options: 
+  chunk_output_type: console
+css: custom.css
+---
+
+```{r echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      echo = FALSE,
+                      include = FALSE)
+
+htmltools::img(src = knitr::image_uri("logoUffAzulTransparente.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:10px; right:0; padding:5px;width: 150px; height: 80px')
+
+library(pacman)
+p_load(char = c("kableExtra", 
+                "foreign",
+                "tidyverse",
+                "readxl",
+                "lubridate",
+                "sf",
+                "tmap",
+                "ggplot2")) 
+
+#setwd("C:/Users/rafae/Dropbox/UFF/LES/ASSESSORIAS/2021/Mariana Seglia - Fiocruz/Atendimento LES - Mariana/Shape")
+```
+
+<div style="text-align: justify">
+
+# Objetivo
+
+O estudo se baseia no conjunto de dados referentes a segurados de uma empresa e residentes no município do Rio de Janeiro.
+
+As informações contêm a localização geográfica das residências dos segurados e seus devidos prêmios do seguro.
+
+Os pesquisadores Igor Freitas e João Pedro Fernandes, recém-contratados por uma empresa de seguro de automóveis, estão encarregados de precificar o valor pago pelos segurados, analisando a dependência espacial.
+
+
+# Análises exploratórias {.tabset .tabset-fade .tabset-pills}
+
+## Parte I 
+
+Os dados totalizam 211 observações de 3 variáveis, referentes à latitude e à longitude das residências dos segurados e ao prêmio do seguro para pessoas que residem no município do Rio de Janeiro.
+
+Como é possível observar na figura abaixo, grande parte dos pontos se localizam à direita do mapa, o que ocasiona vazios na Zona Oeste da cidade.
+
+```{r fig.height = 5, include = TRUE}
+library(raster)
+library(tidyverse)
+library(geoR)
+library(readxl)
+
+# Lendo a base de dados
+base <- read_excel("seguro_auto.xlsx")
+
+# Lendo o SHAPE
+library(rgdal)
+
+mapaRJ <- readOGR("Limite_Bairro_si.shp",layer="Limite_Bairro_si")
+
+# Mapa com pontos
+par(mar=c(4,4,0,0),cex=1.4)
+plot(mapaRJ,xlab="longitude",ylab="latitude")
+points(base$long,base$lat,col=2,pch=21,bg=5)
+axis(1)
+axis(2)
+
+```
+<center><font size="2">
+**Figura 1 - Mapa do município do Rio de Janeiro com as observações referentes às residências dos segurados**
+</center></font>
+
+## Parte II
+
+```{r fig.height = 5, include = TRUE}
+# Histograma do premio
+par(mfrow=c(1,2),mar=c(4,4,0.5,0.5))
+hist(base$premio,main="",xlab="Prêmio",ylab="Frequência")
+hist(log(base$premio),main="",xlab="Log(prêmio)",ylab="Frequência")
+
+```
+<center><font size="2">
+**Figura 2 - Histogramas do prêmio e do logaritmo do prêmio dos segurados**
+</center></font>
+
+
+
+# Análise geoestatística {.tabset .tabset-fade .tabset-pills}
+
+## Parte I 
+
+Interpretando os gráficos gerados a seguir, percebe-se que a maioria das observações relativas às residências dos segurados se encontram na faixa nordeste do município (ao norte e ao leste) e que os valores do logaritmo do prêmio pago pelo segurado estão concentrados entre 7 e 8, em média.
+
+```{r fig.height = 5, include = TRUE}
+base$log_premio <- log(base$premio)
+
+# Transformando em geodata (para usar as funcoes do pacote geoR)
+dados <- as.geodata(base, coords.col = 3:2, data.col = 4, covar.col=1)
+
+plot(dados)
+```
+<center><font size="2">
+**Figura 3- Gráficos referentes às localizações geográficas das residências dos segurados**
+</center></font>
+
+Pela Figura 4, é possível notar que os maiores valores de prêmios a serem pagos pelos segurados estão à direita do gráfico. Também observa-se que praticamente todas as regiões apresentam observações com pequeno valor de prêmio (bolhas verdes ou amarelas), mesmo essas sendo em pequena quantidade.
+
+```{r fig.height = 5, include = TRUE}
+
+par(mfrow=c(1,1))
+points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
+       col=terrain.colors(5))
+
+```
+<center><font size="2">
+**Figura 4 - Dispersão de bolhas dos valores do prêmio pelo segurado**
+</center></font>
+
+
+## Parte II
+
+
+
+
+
+
+
+
+# Conclusões {.tabset .tabset-fade .tabset-pills}
+
+Neste trabalho, após traçar um objetivo inicial, foram feitas análises exploratórias e de padrões pontuais por meio de gráficos de dispersão e testes de quadrantes de CSR, respectivamente.
+
+Com isso, foi possibilitado estimar intensidades via métodos de Quadrantes e de Kernel, a fim de auxiliar na tomada de decisões.
+
+Também para contribuir com os resultados, foram realizadas análises a respeito do método do vizinho mais próximo e do teste da função K de Ripley. 
+
+Por fim, é possível concluir que, pelo interesse dos pesquisadores, o melhor local para frequentarem seria aquele nas proximidades do menor buraco, destacando os lados norte e oeste, já que, pelas análises, esses são os que apresentam maior número de pessoas aglomeradas.
+
