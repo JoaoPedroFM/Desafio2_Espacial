@@ -145,7 +145,7 @@ points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
 
 ## Parte II
 
-Analisando o semivariograma empírico e a tendência estimada por máxima verossimlihança, verifica-se que, após testar os modelos da família matern, esférica, exponencial e gaussiana, optou-se pela utilização do modelo gaussiano. 
+Analisando o semivariograma empírico e a tendência estimada por máxima verossimilhança, verifica-se que, após testar os modelos da família matern, esférica, exponencial e gaussiana, optou-se pela utilização do modelo gaussiano. 
 
 O alcance encontrado foi bem pequeno, mesmo indicando um processo razoavelmente suave ao longo do espaço. Assim, já para pequenas distâncias, não há tanta dependência espacial.
 
@@ -268,23 +268,22 @@ Em comparação, os maiores prêmios estão concentrados em regiões que cruzam 
 
 ```{r results='hide'}
 
-plot(mapaRJ,xlab="longitude",ylab="latitude")
-
-```
-
-```{r fig.height = 5, include = TRUE}
-
-
+plot(mapaRJ,xlab="longitude",ylab="latitude",xaxt = "n", yaxt = "n", 
+     bty = "n",type="n")
 
 # media
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
 image(krigagem, loc=grid.pred, 
       col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
+
 ```
-<center><font size="2">
-**Figura 8- Superfície de predição média dos valores do prêmio a partir de krigagem simples**
-</center></font>
+
+<center>
+
+![*Figura 8- Superfície de predição média dos valores do prêmio a partir de krigagem simples*](mapa_media.png)
+
+</center>
 
 Na Figura 9, percebe-se que na Zona Oeste, principalmente, há poucas observações registradas, o que gera uma grande incerteza sobre as predições dos valores do prêmio nessa região.
 
@@ -298,10 +297,6 @@ plot(mapaRJ,xlab="longitude",ylab="latitude")
 points(base$long,base$lat,col=2,pch=21,bg=5)
 axis(1)
 axis(2)
-```
-
-
-```{r fig.height = 5, include = TRUE}
 
 # variancia
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
@@ -309,17 +304,23 @@ image(krigagem, loc=grid.pred,
       values=krigagem$krige.var, col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 ```
-<center><font size="2">
-**Figura 9- Superfície de variância de predição dos valores do prêmio a partir de krigagem simples**
-</center></font>
+
+<center>
+
+![*Figura 9- Superfície de variância de predição dos valores do prêmio a partir de krigagem simples*](mapa_variancia.png)
+
+</center>
 
 # Conclusões {.tabset .tabset-fade .tabset-pills}
 
-Neste trabalho, após traçar um objetivo inicial, foram feitas análises exploratórias e de padrões pontuais por meio de gráficos de dispersão e testes de quadrantes de CSR, respectivamente.
+Neste trabalho, após traçar um objetivo inicial, foram feitas análises exploratórias e geoestatísticas por meio de gráficos e mapas.
 
-Com isso, foi possibilitado estimar intensidades via métodos de Quadrantes e de Kernel, a fim de auxiliar na tomada de decisões.
+Com isso, foi possibilitado plotar o semivariograma empírico e estimar a tendência por máxima verossimilhança após testar diferentes modelos. O alcance encontrado foi pequeno, o que indicou que para distâncias já não muito grandes, a dependência espacial não era expressiva. 
 
-Também para contribuir com os resultados, foram realizadas análises a respeito do método do vizinho mais próximo e do teste da função K de Ripley. 
+Por fim, é possível concluir que, através dos métodos de interpolação ponderada pelo inverso da distância e krigagem:
 
-Por fim, é possível concluir que, pelo interesse dos pesquisadores, o melhor local para frequentarem seria aquele nas proximidades do menor buraco, destacando os lados norte e oeste, já que, pelas análises, esses são os que apresentam maior número de pessoas aglomeradas.
+* as regiões com prêmios mais altos estão localizadas em áreas como as de vias expressas, divisa de municípios, principalmente mais ao norte e à direita do mapa da cidade;
 
+* já os menores valores a serem pagos pelos segurados são os de residentes em zonas nobres, como a Zona Sul;
+
+* a Zona Oeste apresenta poucas observações registradas, ocasionando uma certa incerteza sobre as predições dos valores do prêmio nessa região, ao contrário das zonas mais ao leste e ao norte do mapa, que possuem menor variabilidade em relação às suas observações.
