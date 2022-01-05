@@ -145,12 +145,16 @@ points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
 
 ## Parte II
 
+Analisando o semivariograma empírico e a tendência estimada por máxima verossimlihança, verifica-se que, após testar os modelos da família matern, esférica, exponencial e gaussiana, optou-se pela utilização do modelo gaussiano. 
+
+O alcance encontrado foi bem pequeno, mesmo indicando um processo razoavelmente suave ao longo do espaço. Assim, já para pequenas distâncias, não há tanta dependência espacial.
+
 ```{r results='hide'}
 # Variograma empirico
 v <- geoR::variog(dados,trend= ~ dados$coords)
 
-par(mfrow=c(1,2),mar=c(4,4,0.5,0.5),cex=1.5)
-plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
+par(mfrow=c(1,1),mar=c(4,4,0.5,0.5),cex=1.5)
+plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.5))
 
 # eyefit(v)
 
@@ -158,9 +162,7 @@ plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
 # opcoes para trend: cte (media constante), 1st (tendencia linear) e 2st (tendencia quadratica).
 
 # trend.spatial(~coords + sinistro, dados)[1:5,]
-```
 
-```{r results='hide'}
 
 # Estimando o efeito pepita:
 mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), cov.model="gaussian", fix.nugget = TRUE, nugget=0.15)
@@ -169,7 +171,7 @@ summary(mv)
 
 ```{r fig.height = 5, include = TRUE}
 
-plot(v,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.6))
+plot(v,col=4,xlab="distância",ylab="semivariograma",ylim=c(0,0.5))
 lines(mv,lty=1,col="blue")
 
 ```
@@ -178,6 +180,14 @@ lines(mv,lty=1,col="blue")
 </center></font>
 
 ## Parte III
+
+De acordo com a Figura 6, é possível tirar algumas conclusões: 
+
+* existem regiões com prêmios muito altos, porém com locais na mesma região com valores de prêmios baixos;
+
+* confirmando o alcance pequeno observado anteriormente, na região escura, em pequenas distâncias já não há dependências expressivas entre os dados;
+
+* a Zona Sul e a faixa mais à oeste do mapa aparentam apresentar os valores de prêmios mais baixos e as regiões com vias expressas, próximos de locais favelizados e na divisa de municípios, por exemplo, os mais altos.
 
 ```{r results='hide'}
 
@@ -190,7 +200,7 @@ base.idw <- as.data.frame(cbind(dados$coords,dados$data))
 coordinates(base.idw) <- c("long", "lat")
 
 summary(dados$coords)
-long = seq(-43.8,-43.1,l=50)
+long = seq(-43.7,-43.1,l=50)
 lat = seq(-23.1,-22.79,l=50)
 nx = length(long)
 ny = length(lat)
@@ -218,16 +228,18 @@ filled.contour(long, lat,interpol.matriz,
                })
 ```
 <center><font size="2">
-**Figura 6 - Gráfico de interpolação ponderada pelo inverso da distância**
+**Figura 6 - Mapa com a interpolação ponderada pelo inverso da distância**
 </center></font>
 
 ## Parte IV
+
+Pelo histograma a seguir, usando uma janela de 2.500 pontos preditos, percebe-se que o y ajustado parece ter distribuição normal em torno de 7 e 8.
 
 ```{r results='hide'}
 
 ### Krigagem
 
-long.pred = seq(-43.8,-43.1,l=50)
+long.pred = seq(-43.7,-43.1,l=50)
 lat.pred = seq(-23.1,-22.79,l=50)
 grid.pred <- expand.grid(long.pred,lat.pred)
 
@@ -239,16 +251,44 @@ krigagem <- krige.conv(dados, loc=grid.pred,
                                            trend.l = trend.spatial(~Var1+Var2, grid.pred),
                                            beta=mv$beta,
                                            nugget=mv$nugget,
-                                           cov.pars=mv$cov.pars))
+                                           cov.pars=c(0.1884,0.01)))
 ```
 
 ```{r fig.height = 5, include = TRUE}
 
-hist(krigagem$predict)
+hist(krigagem$predict, ylab="Frequência", xlab="Predições por krigagem", main="")
 ```
 <center><font size="2">
 **Figura 7- Histograma dos valores do prêmio preditos por krigagem simples**
 </center></font>
+
+Pela superfície apresentada na Figura 8, os menores valores a serem pagos pelos segurados são os de residentes em zonas nobres, como a Zona Sul. 
+
+Em comparação, os maiores prêmios estão concentrados em regiões que cruzam vias expressas, divisas de municípios e outras áreas espalhadas pela cidade.
+
+```{r results='hide'}
+
+plot(mapaRJ,xlab="longitude",ylab="latitude")
+
+```
+
+```{r fig.height = 5, include = TRUE}
+
+
+
+# media
+par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
+image(krigagem, loc=grid.pred, 
+      col=terrain.colors(256))
+plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
+```
+<center><font size="2">
+**Figura 8- Superfície de predição média dos valores do prêmio a partir de krigagem simples**
+</center></font>
+
+Na Figura 9, percebe-se que na Zona Oeste, principalmente, há poucas observações registradas, o que gera uma grande incerteza sobre as predições dos valores do prêmio nessa região.
+
+O que não ocorre na parte mais ao leste e ao norte do mapa, em que existe mais certeza encontrada, ou seja, muitos pontos ao redor e variância de predição pequena.
 
 ```{r results='hide'}
 
@@ -260,17 +300,6 @@ axis(1)
 axis(2)
 ```
 
-```{r fig.height = 5, include = TRUE}
-
-# media
-par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
-image(krigagem, loc=grid.pred, 
-      col=terrain.colors(256))
-plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
-```
-<center><font size="2">
-**Figura 8- Superfície de predição média dos valores do prêmio a partir de krigagem simples**
-</center></font>
 
 ```{r fig.height = 5, include = TRUE}
 

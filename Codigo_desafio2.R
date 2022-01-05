@@ -64,10 +64,10 @@ plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.5))
 
 # Estimando o efeito pepita:
 mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), 
-             cov.model="exponential", fix.nugget = TRUE, nugget=0.15)
+             cov.model="gaussian",fix.nugget = TRUE,nugget=0.15)
 summary(mv)
 
-plot(v,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.5))
+plot(v,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
 lines(mv,lty=1,col="blue")
 
 
@@ -81,7 +81,7 @@ base.idw <- as.data.frame(cbind(dados$coords,dados$data))
 coordinates(base.idw) <- c("long", "lat")
 
 summary(dados$coords)
-long = seq(-43.8,-43.1,l=50)
+long = seq(-43.7,-43.1,l=50)
 lat = seq(-23.1,-22.79,l=50)
 nx = length(long)
 ny = length(lat)
@@ -110,7 +110,7 @@ filled.contour(long, lat,interpol.matriz,
 
 ### Krigagem
 
-long.pred = seq(-43.8,-43.1,l=50)
+long.pred = seq(-43.7,-43.1,l=50)
 lat.pred = seq(-23.1,-22.79,l=50)
 grid.pred <- expand.grid(long.pred,lat.pred)
 
@@ -122,9 +122,9 @@ krigagem <- krige.conv(dados, loc=grid.pred,
                                            trend.l = trend.spatial(~Var1+Var2, grid.pred),
                                            beta=mv$beta,
                                            nugget=mv$nugget,
-                                           cov.pars=mv$cov.pars))
+                                           cov.pars=c(0.1884,0.01)))
 
-hist(krigagem$predict)
+hist(krigagem$predict, ylab="Frequência", xlab="Predições por krigagem", main="")
 
 # Mapa com pontos
 par(mar=c(4,4,0,0),cex=1.4)
@@ -134,8 +134,8 @@ axis(1)
 axis(2)
 # media
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
-image(krigagem, loc=grid.pred,
-      col=terrain.colors(256))
+image(krigagem, loc=grid.pred, 
+      col=terrain.colors(123))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 
 # Mapa com pontos

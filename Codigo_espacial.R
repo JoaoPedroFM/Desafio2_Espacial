@@ -64,7 +64,7 @@ v <- geoR::variog(dados,trend= ~ dados$coords) # utiliza coordenadas na tendenci
 
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5),cex=1.5)
 plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
-# alcance pequeno, altura = efeito pepita, comportamento nao suave
+# alcance pequeno, patamar eh proximo do efeito pepita, comportamento nao suave ao longo do espaco
 
 # eyefit(v)
 
@@ -86,7 +86,7 @@ summary(mv)
 plot(v,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.6))
 lines(mv,lty=1,col="blue")
 # alcance pequeno, logo chega no patamar, sem longas dependencias no espaco
-# nao ha tanta dependencia espacial em pequenas distancias
+# nao ha tanta dependencia espacial ja em pequenas distancias
 
 # se houvesse alcance grande -> processo suave, ate longas distancias apresentam 
 # dependencias no espaco
