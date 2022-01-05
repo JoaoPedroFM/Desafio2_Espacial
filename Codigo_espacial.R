@@ -130,7 +130,7 @@ filled.contour(long, lat,interpol.matriz,
 # regiao que apresentam precos muito baixos, mas na mesma, ha locais com precos muito altos
 
 # de acordo com o alcance pequeno, na regiao escura, em pequenas distancias nao ha 
-# dependencias expressivas entre os dados
+# dependencias expressivas entre os dados (grafico bem erratico)
 
 # Zona Sul precos mais BAIXOS, regioes com vias, proximos de locais favelizados e 
 # divisa de municipios - mais ALTOS
@@ -153,22 +153,40 @@ krigagem <- krige.conv(dados, loc=grid.pred,
                                            nugget=mv$nugget,
                                            cov.pars=mv$cov.pars))
 
-hist(krigagem$predict)
+hist(krigagem$predict) # janela de 2500 pontos preditos (y's estimados)
+# y ajustado paree ter distribuicao normal 
+
+# Mapa com pontos
+par(mar=c(4,4,0,0),cex=1.4)
+plot(mapaRJ,xlab="longitude",ylab="latitude")
+points(base$long,base$lat,col=2,pch=21,bg=5)
+axis(1)
+axis(2)
 # media
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
-image(krigagem, loc=grid.pred,
+image(krigagem, loc=grid.pred, 
       col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
+# mais verde, menor o valor do preco
+# mais branco/claro, maior o valor do preco
+# maiores precos em regioes em que cruzam vias expressas, maiores premios
+# zonas mais nobres, premios sao menores
 
+# Mapa com pontos
+par(mar=c(4,4,0,0),cex=1.4)
+plot(mapaRJ,xlab="longitude",ylab="latitude")
+points(base$long,base$lat,col=2,pch=21,bg=5)
+axis(1)
+axis(2)
 # variancia
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
-image(krigagem, loc=grid.pred, coords=dados$coords,
+image(krigagem, loc=grid.pred, 
       values=krigagem$krige.var, col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
-
-
-
-
+# mais verde, menor a variancia do valor do preco
+# mais branco/claro, maior a variancia do valor do preco
+# muitas observacoes (pontos ao redor), variancia de predicao eh pequena, mais certeza
+# parte branca, incerteza alta para predicao, poucas observacoes
 
 ########################
 ### Modelo Bayesiano ###

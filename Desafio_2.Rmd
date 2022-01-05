@@ -46,7 +46,7 @@ O estudo se baseia no conjunto de dados referentes a segurados de uma empresa e 
 
 As informações contêm a localização geográfica das residências dos segurados e seus devidos prêmios do seguro.
 
-Os pesquisadores Igor Freitas e João Pedro Fernandes, recém-contratados por uma empresa de seguro de automóveis, estão encarregados de precificar o valor pago pelos segurados, analisando a dependência espacial.
+Os pesquisadores Igor Freitas e João Pedro Fernandes, recém-contratados por uma empresa de seguro de automóveis, estão encarregados de precificar o valor pago pelos segurados, analisando a dependência espacial na região estudada.
 
 
 # Análises exploratórias {.tabset .tabset-fade .tabset-pills}
@@ -55,7 +55,7 @@ Os pesquisadores Igor Freitas e João Pedro Fernandes, recém-contratados por um
 
 Os dados totalizam 211 observações de 3 variáveis, referentes à latitude e à longitude das residências dos segurados e ao prêmio do seguro para pessoas que residem no município do Rio de Janeiro.
 
-Como é possível observar na figura abaixo, grande parte dos pontos se localizam à direita do mapa, o que ocasiona vazios na Zona Oeste da cidade.
+Como é possível observar no mapa abaixo, grande parte dos pontos se localizam à direita do mapa, o que ocasiona vazios em relação às observações principalmente na Zona Oeste da cidade.
 
 ```{r results='hide'}
 library(raster)
@@ -87,6 +87,10 @@ axis(2)
 
 ## Parte II
 
+Analisando histogramas, chega-se à conclusão que os valores do prêmio têm comportamento assimétrico, com maior variabilidade, já que há pontos cujos valores de seguro são muito altos (outliers). Já o log do prêmio apresenta comportamento se assemelhando à distribuição normal, diminuindo a variabiidade e estibilizando um pouco a incerteza. 
+Dessa forma, se escolhe modelar o logaritmo do prêmio.
+
+
 ```{r fig.height = 5, include = TRUE}
 # Histograma do premio
 par(mfrow=c(1,2),mar=c(4,4,0.5,0.5))
@@ -104,7 +108,7 @@ hist(log(base$premio),main="",xlab="Log(prêmio)",ylab="Frequência")
 
 ## Parte I 
 
-Interpretando os gráficos gerados a seguir, percebe-se que a maioria das observações relativas às residências dos segurados se encontram na faixa nordeste do município (ao norte e ao leste) e que os valores do logaritmo do prêmio pago pelo segurado estão concentrados entre 7 e 8, em média.
+Interpretando os gráficos gerados a seguir, percebe-se que a maioria das observações relativas às residências dos segurados se encontram na faixa nordeste do município (ao norte e ao leste) e que os valores do logaritmo do prêmio pago pelo segurado estão concentrados entre 7 e 8, em média, e aparentam apresentar distribuição normal.
 
 ```{r results='hide'}
 base$log_premio <- log(base$premio)
@@ -118,20 +122,24 @@ dados <- as.geodata(base, coords.col = 3:2, data.col = 4, covar.col=1)
 plot(dados)
 ```
 <center><font size="2">
-**Figura 3- Gráficos referentes às localizações geográficas das residências dos segurados**
+**Figura 3- Gráficos referentes às localizações geográficas das residências dos segurados e o logaritmo do prêmio**
 </center></font>
 
-Pela Figura 4, é possível notar que os maiores valores de prêmios a serem pagos pelos segurados estão à direita do gráfico. Também observa-se que praticamente todas as regiões apresentam observações com pequeno valor de prêmio (bolhas verdes ou amarelas), mesmo essas sendo em pequena quantidade.
+Pela Figura 4, são tiradas algumas indicações a partir do gráfico. Os segurados na faixa à noroeste apresentam valores próximos de prêmios, assim como os residentes da Zona Sul, por exemplo. 
 
-```{r fig.height = 5, include = TRUE}
+É possível notar que os maiores valores de prêmios a serem pagos pelos segurados estão, principalmente, à direita e acima do gráfico (maior presença de bolhas brancas). 
 
+Também observa-se que praticamente todas as regiões apresentam observações com pequeno valor de prêmio (bolhas verdes ou amarelas) ao mesmo tempo que observações com valores de prêmio maiores (bolhas rosas ou brancas). 
+
+
+```{r fig.height = 5, include = TRUE, fig.weight = 12}
 par(mfrow=c(1,1))
 points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
        col=terrain.colors(5))
 
 ```
 <center><font size="2">
-**Figura 4 - Dispersão de bolhas dos valores do prêmio pelo segurado**
+**Figura 4 - Gráfico de quantis dos valores do logaritmo do prêmio pelo segurado**
 </center></font>
 
 
@@ -155,8 +163,7 @@ plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
 ```{r results='hide'}
 
 # Estimando o efeito pepita:
-mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), cov.model="gaussian",
-             fix.nugget = TRUE,nugget=0.3)
+mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), cov.model="gaussian", fix.nugget = TRUE, nugget=0.15)
 summary(mv)
 ```
 
@@ -243,11 +250,21 @@ hist(krigagem$predict)
 **Figura 7- Histograma dos valores do prêmio preditos por krigagem simples**
 </center></font>
 
+```{r results='hide'}
+
+# Mapa com pontos
+par(mar=c(4,4,0,0),cex=1.4)
+plot(mapaRJ,xlab="longitude",ylab="latitude")
+points(base$long,base$lat,col=2,pch=21,bg=5)
+axis(1)
+axis(2)
+```
+
 ```{r fig.height = 5, include = TRUE}
 
 # media
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
-image(krigagem, loc=grid.pred,
+image(krigagem, loc=grid.pred, 
       col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 ```
@@ -259,7 +276,7 @@ plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 
 # variancia
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
-image(krigagem, loc=grid.pred, coords=dados$coords,
+image(krigagem, loc=grid.pred, 
       values=krigagem$krige.var, col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 ```

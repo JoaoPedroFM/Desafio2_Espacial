@@ -53,7 +53,7 @@ points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
 v <- geoR::variog(dados,trend= ~ dados$coords)
 
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5),cex=1.5)
-plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
+plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.5))
 
 # eyefit(v)
 
@@ -63,11 +63,11 @@ plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
 # trend.spatial(~coords + sinistro, dados)[1:5,]
 
 # Estimando o efeito pepita:
-mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), cov.model="gaussian",
-             fix.nugget = TRUE,nugget=0.3)
+mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), 
+             cov.model="exponential", fix.nugget = TRUE, nugget=0.15)
 summary(mv)
 
-plot(v,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.6))
+plot(v,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.5))
 lines(mv,lty=1,col="blue")
 
 
@@ -125,14 +125,27 @@ krigagem <- krige.conv(dados, loc=grid.pred,
                                            cov.pars=mv$cov.pars))
 
 hist(krigagem$predict)
+
+# Mapa com pontos
+par(mar=c(4,4,0,0),cex=1.4)
+plot(mapaRJ,xlab="longitude",ylab="latitude")
+points(base$long,base$lat,col=2,pch=21,bg=5)
+axis(1)
+axis(2)
 # media
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
 image(krigagem, loc=grid.pred,
       col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 
+# Mapa com pontos
+par(mar=c(4,4,0,0),cex=1.4)
+plot(mapaRJ,xlab="longitude",ylab="latitude")
+points(base$long,base$lat,col=2,pch=21,bg=5)
+axis(1)
+axis(2)
 # variancia
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5))
-image(krigagem, loc=grid.pred, coords=dados$coords,
+image(krigagem, loc=grid.pred, 
       values=krigagem$krige.var, col=terrain.colors(256))
 plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
