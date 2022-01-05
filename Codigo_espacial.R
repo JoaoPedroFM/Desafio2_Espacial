@@ -35,8 +35,11 @@ axis(2)
 
 # Histograma do premio
 par(mfrow=c(1,2),mar=c(4,4,0.5,0.5))
-hist(base$premio,main="",xlab="premio")
-hist(log(base$premio),main="",xlab="log(premio)")
+hist(base$premio,main="",xlab="premio") 
+# comportamento assimetrico, variabilidade maior, valores de seguro muito altos (outliers)
+hist(log(base$premio),main="",xlab="log(premio)") 
+# comportamento se assemelhando a distribuicao normal -> se escolhe modelar o log do premio
+# diminui a variabiidade, estibilizando um pouco a incerteza
 
 base$log_premio <- log(base$premio)
 
@@ -44,16 +47,24 @@ base$log_premio <- log(base$premio)
 dados <- as.geodata(base, coords.col = 8:7, data.col = 17, covar.col=c(1:6,9:16))
 
 plot(dados)
+# dado aparentando distribuicao normal, mais pro norte e mais pra direita (dependencia espacial)
 
 par(mfrow=c(1,1))
 points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
        col=terrain.colors(5))
+# quantis: mais pro verde e menor a bola -> menor o valor
+# quantis: mais pro branco e maior a bola -> maior o valor
+# Indicacoes
+# segurados na regiao da Barra sao parecidos entre si, com valores altos de seguro
+# em cima -> talvez ha valores altos
+# zona a noroeste -> segurados com valores proximos
 
 # Variograma empirico
-v <- geoR::variog(dados,trend= ~ dados$coords)
+v <- geoR::variog(dados,trend= ~ dados$coords) # utiliza coordenadas na tendencia
 
 par(mfrow=c(1,1),mar=c(4,4,0.5,0.5),cex=1.5)
 plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
+# alcance pequeno, altura = efeito pepita, comportamento nao suave
 
 # eyefit(v)
 
@@ -63,13 +74,22 @@ plot(v,pch=16,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,1))
 # trend.spatial(~coords + sinistro, dados)[1:5,]
 
 # Estimando o efeito pepita:
-mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), cov.model="gaussian",
-             fix.nugget = TRUE,nugget=0.3)
+mv <- likfit(dados, ini=c(0.1,0.1), trend = trend.spatial(~coords, dados), 
+             cov.model="gaussian",fix.nugget = TRUE,nugget=0.3) # nugget= efeito pepita
+# testar modelo da familia matern, esferica e exponencial
 summary(mv)
+# medidas melhores no modelo de estrutura de dependencia espacial, se ajusta melhor
+# do que o modelo que ignora a dependencia espacial na variavel do premio
+# (modelo linear que supoe independencia)
+# Melhor usar o modelo espacial 
 
 plot(v,col=4,xlab="distancia",ylab="semivariograma",ylim=c(0,0.6))
 lines(mv,lty=1,col="blue")
+# alcance pequeno, logo chega no patamar, sem longas dependencias no espaco
+# nao ha tanta dependencia espacial em pequenas distancias
 
+# se houvesse alcance grande -> processo suave, ate longas distancias apresentam 
+# dependencias no espaco
 
 
 ### Interpolacao ponderada pelo inverso da distancia
@@ -81,7 +101,7 @@ base.idw <- as.data.frame(cbind(dados$coords,dados$data))
 coordinates(base.idw) <- c("long", "lat")
 
 summary(dados$coords)
-long = seq(-43.8,-43.1,l=50)
+long = seq(-43.8,-43.1,l=50) 
 lat = seq(-23.1,-22.79,l=50)
 nx = length(long)
 ny = length(lat)
@@ -105,6 +125,15 @@ filled.contour(long, lat,interpol.matriz,
                   plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
                   })
 
+# Indicacao
+# mapa do log do premio, mais escuro -> maior o log do preco -> maior o preco
+# regiao que apresentam precos muito baixos, mas na mesma, ha locais com precos muito altos
+
+# de acordo com o alcance pequeno, na regiao escura, em pequenas distancias nao ha 
+# dependencias expressivas entre os dados
+
+# Zona Sul precos mais BAIXOS, regioes com vias, proximos de locais favelizados e 
+# divisa de municipios - mais ALTOS
 
 
 
