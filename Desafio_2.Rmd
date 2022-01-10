@@ -190,7 +190,7 @@ De acordo com a Figura 6, é possível tirar algumas conclusões:
 
 * existem regiões com prêmios muito altos, porém com locais na mesma região com valores de prêmios baixos;
 
-* confirmando o alcance pequeno observado anteriormente, na região escura, em pequenas distâncias já não há dependências expressivas entre os dados;
+* confirmando o alcance pequeno observado anteriormente: próximo à região escura, em pequenas distâncias já não há dependências expressivas entre os dados;
 
 * a Zona Sul e a faixa mais à oeste do mapa aparentam apresentar os valores de prêmios mais baixos e as regiões com vias expressas, próximos de locais favelizados e na divisa de municípios, por exemplo, os mais altos.
 
@@ -205,7 +205,7 @@ base.idw <- as.data.frame(cbind(dados$coords,dados$data))
 coordinates(base.idw) <- c("long", "lat")
 
 summary(dados$coords)
-long = seq(-43.7,-43.1,l=50)
+long = seq(-43.8,-43.1,l=50)
 lat = seq(-23.1,-22.79,l=50)
 nx = length(long)
 ny = length(lat)
@@ -238,13 +238,13 @@ filled.contour(long, lat,interpol.matriz,
 
 ## Parte IV
 
-Pelo histograma a seguir, usando uma janela de 2.500 pontos preditos, percebe-se que o y ajustado parece ter distribuição normal em torno de 7 e 8.
+Pelo histograma a seguir, usando uma janela de 2.500 pontos preditos, percebe-se que o y ajustado parece ter distribuição normal com valores em torno de 7 e 8 e média próxima a 7,5.
 
 ```{r results='hide'}
 
 ### Krigagem
 
-long.pred = seq(-43.7,-43.1,l=50)
+long.pred = seq(-43.8,-43.1,l=50)
 lat.pred = seq(-23.1,-22.79,l=50)
 grid.pred <- expand.grid(long.pred,lat.pred)
 
@@ -264,12 +264,12 @@ krigagem <- krige.conv(dados, loc=grid.pred,
 hist(krigagem$predict, ylab="Frequência", xlab="Predições por krigagem", main="")
 ```
 <center><font size="2">
-**Figura 7- Histograma dos valores do prêmio preditos por krigagem simples**
+**Figura 7- Histograma dos valores do logaritmo do prêmio preditos por krigagem simples**
 </center></font>
 
 Pela superfície apresentada na Figura 8, os menores valores a serem pagos pelos segurados são os de residentes em zonas nobres, como a Zona Sul. 
 
-Em comparação, os maiores prêmios estão concentrados em regiões que cruzam vias expressas, divisas de municípios e outras áreas espalhadas pela cidade.
+Em comparação, os maiores prêmios estão concentrados em regiões que cruzam vias expressas, divisas de municípios, dentre outras áreas espalhadas pela cidade.
 
 ```{r results='hide'}
 
@@ -292,7 +292,7 @@ plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 
 Na Figura 9, percebe-se que na Zona Oeste, principalmente, há poucas observações registradas, o que gera uma grande incerteza sobre as predições dos valores do prêmio nessa região.
 
-O que não ocorre na parte mais ao leste e ao norte do mapa, em que existe mais certeza encontrada, ou seja, muitos pontos ao redor e variância de predição pequena.
+O que não ocorre na parte mais ao leste e ao norte do mapa, em que existe mais certeza encontrada, ou seja, muitos pontos ao redor e menor variância de predição.
 
 ```{r results='hide'}
 
@@ -322,7 +322,7 @@ Neste trabalho, após traçar um objetivo inicial, foram feitas análises explor
 
 Com isso, foi possibilitado plotar o semivariograma empírico e estimar a tendência por máxima verossimilhança após testar diferentes modelos. O alcance encontrado foi pequeno, o que indicou que para distâncias já não muito grandes, a dependência espacial não era expressiva. 
 
-Por fim, é possível concluir que, através dos métodos de interpolação ponderada pelo inverso da distância e krigagem:
+Por fim, é possível concluir que, através dos métodos de interpolação ponderada pelo inverso da distância e krigagem simples:
 
 * as regiões com prêmios mais altos estão localizadas em áreas como as de vias expressas, divisa de municípios, principalmente mais ao norte e à direita do mapa da cidade;
 
