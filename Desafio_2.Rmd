@@ -87,8 +87,8 @@ axis(2)
 
 ## Parte II
 
-Analisando histogramas, chega-se à conclusão que os valores do prêmio têm comportamento assimétrico, com maior variabilidade, já que há pontos cujos valores de seguro são muito altos (outliers). Já o log do prêmio apresenta comportamento se assemelhando à distribuição normal, diminuindo a variabiidade e estibilizando um pouco a incerteza. 
-Dessa forma, se escolhe modelar o logaritmo do prêmio.
+Analisando histogramas, chega-se à conclusão que os valores do prêmio têm comportamento assimétrico, com maior variabilidade, já que há pontos cujos valores de seguro são muito altos (outliers). Já o log do prêmio apresenta comportamento se assemelhando à distribuição normal, diminuindo a variabiidade e estabilizando um pouco a incerteza. 
+Dessa forma, escolhe-se modelar o logaritmo do prêmio.
 
 
 ```{r fig.height = 5, include = TRUE}
@@ -108,7 +108,7 @@ hist(log(base$premio),main="",xlab="Log(prêmio)",ylab="Frequência")
 
 ## Parte I 
 
-Interpretando os gráficos gerados a seguir, percebe-se que a maioria das observações relativas às residências dos segurados se encontram na faixa nordeste do município (ao norte e ao leste) e que os valores do logaritmo do prêmio pago pelo segurado estão concentrados entre 7 e 8, em média, e aparentam apresentar distribuição normal.
+Interpretando os gráficos gerados a seguir (Figura 3), percebe-se que a maioria das observações relativas às residências dos segurados se encontram na faixa nordeste do município (ao norte e ao leste) e que os valores do logaritmo do prêmio pago pelo segurado estão concentrados entre 7 e 8, em média, e aparentam apresentar distribuição normal.
 
 ```{r results='hide'}
 base$log_premio <- log(base$premio)
@@ -132,22 +132,27 @@ Pela Figura 4, são tiradas algumas indicações a partir do gráfico. Os segura
 Também observa-se que praticamente todas as regiões apresentam observações com pequeno valor de prêmio (bolhas verdes ou amarelas) ao mesmo tempo que observações com valores de prêmio maiores (bolhas rosas ou brancas). 
 
 
-```{r fig.height = 5, include = TRUE, fig.weight = 12}
+```{r results='hide'}
 par(mfrow=c(1,1))
 points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
        col=terrain.colors(5))
 
 ```
-<center><font size="2">
-**Figura 4 - Gráfico de quantis dos valores do logaritmo do prêmio pelo segurado**
-</center></font>
+<!-- <center><font size="2"> -->
+<!-- **Figura 4 - Gráfico de quantis dos valores do logaritmo do prêmio pelo segurado** -->
+<!-- </center></font> -->
 
+<center>
+
+![**Figura 4 - Gráfico de quantis dos valores do logaritmo do prêmio pelo segurado**](bolhas.png)
+
+</center>
 
 ## Parte II
 
-Analisando o semivariograma empírico e a tendência estimada por máxima verossimilhança, verifica-se que, após testar os modelos da família matern, esférica, exponencial e gaussiana, optou-se pela utilização do modelo gaussiano. 
+Analisando o semivariograma empírico e a tendência estimada por máxima verossimilhança (Figura 5), verifica-se que, após testar os modelos da família matern, esférica, exponencial e gaussiana, optou-se pela utilização do modelo gaussiano. 
 
-O alcance encontrado foi bem pequeno, mesmo indicando um processo razoavelmente suave ao longo do espaço. Assim, já para pequenas distâncias, não há tanta dependência espacial.
+O alcance (distância até se chegar no patamar) encontrado foi bem pequeno, indicando uma subida rápida nos valores do semivariograma. Assim, já para pequenas distâncias, não há tanta dependência espacial.
 
 ```{r results='hide'}
 # Variograma empirico
@@ -170,7 +175,7 @@ summary(mv)
 ```
 
 ```{r fig.height = 5, include = TRUE}
-
+par(mfrow=c(1,1))
 plot(v,col=4,xlab="distância",ylab="semivariograma",ylim=c(0,0.5))
 lines(mv,lty=1,col="blue")
 
@@ -221,7 +226,7 @@ interpol.matriz = matrix(interpol$var1.pred,nx,ny)
 # grafico
 #opcao 1
 filled.contour(long, lat,interpol.matriz,
-               key.title = title(main = "log premio", cex.main = 1),
+               key.title = title(main = "log prêmio", cex.main = 1),
                plot.axes={axis(1)
                  axis(2)
                  plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
@@ -281,7 +286,7 @@ plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 
 <center>
 
-![*Figura 8- Superfície de predição média dos valores do prêmio a partir de krigagem simples*](mapa_media.png)
+![**Figura 8- Superfície de predição média dos valores do prêmio a partir de krigagem simples**](mapa_media.png)
 
 </center>
 
@@ -307,7 +312,7 @@ plot(mapaRJ,xlab="longitude",ylab="latitude",add=TRUE)
 
 <center>
 
-![*Figura 9- Superfície de variância de predição dos valores do prêmio a partir de krigagem simples*](mapa_variancia.png)
+![**Figura 9- Superfície de variância de predição dos valores do prêmio a partir de krigagem simples**](mapa_variancia.png)
 
 </center>
 
