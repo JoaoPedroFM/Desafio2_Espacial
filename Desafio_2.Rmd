@@ -135,7 +135,7 @@ Também observa-se que praticamente todas as regiões apresentam observações c
 ```{r results='hide'}
 par(mfrow=c(1,1))
 points(dados,cex.min=1, cex.max=5, pt.sizes="quintiles",
-       col=terrain.colors(5))
+       col=terrain.colors(5),xlab="longitude",ylab="latitude")
 
 ```
 <!-- <center><font size="2"> -->
